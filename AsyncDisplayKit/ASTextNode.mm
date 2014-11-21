@@ -8,7 +8,7 @@
 
 #import "ASTextNode.h"
 
-#import <AsyncDisplayKit/_ASDisplayLayer.h>
+//#import <AsyncDisplayKit/_ASDisplayLayer.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>

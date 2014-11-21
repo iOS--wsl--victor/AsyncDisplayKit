@@ -294,6 +294,12 @@
  */
 @property (nonatomic, assign) BOOL shouldRasterizeDescendants;
 
+/**
+ * @abstract Calls -setNeedsDisplay and -displayIfNeeded on the node's backing store and recursively calls -display on
+ * all subnodes forcing the entire node hierarchy to be displayed.
+ */
+- (void)display;
+
 /** 
  * @abstract Display the node's view/layer immediately on the current thread, bypassing the background thread rendering.
  */

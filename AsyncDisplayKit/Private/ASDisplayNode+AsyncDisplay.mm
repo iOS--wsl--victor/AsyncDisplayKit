@@ -50,7 +50,7 @@ static void __ASDisplayLayerIncrementConcurrentDisplayCount(BOOL displayIsAsync,
   }
 
 #if ASDISPLAYNODE_DELAY_DISPLAY
-  usleep( (long)(0.05 * USEC_PER_SEC) );
+  usleep( (long)(0.1 * USEC_PER_SEC) );
 #endif
 
 }
