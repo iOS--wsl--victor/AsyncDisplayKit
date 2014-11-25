@@ -14,7 +14,7 @@
 #import "ExpensiveController.h"
 #import "CheapController.h"
 
-#define AS_DEMO_PRELOADING 0
+#define AS_DEMO_PRELOADING 1
 
 @implementation AppDelegate
 
@@ -25,9 +25,11 @@
 
   CheapController *cheap = [[CheapController alloc] init];
   cheap.tabBarItem.title = @"Cheap";
+  cheap.tabBarItem.image = [UIImage imageNamed:@"cheap"];
 
   ExpensiveController *expensive = [[ExpensiveController alloc] init];
   expensive.tabBarItem.title = @"Expensive";
+  expensive.tabBarItem.image = [UIImage imageNamed:@"expensive"];
 
 #if AS_DEMO_PRELOADING
   [expensive preloadForSize:screenBounds.size];

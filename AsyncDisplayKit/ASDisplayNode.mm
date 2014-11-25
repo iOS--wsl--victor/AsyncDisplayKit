@@ -439,11 +439,20 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 
 - (void)display
 {
+  ASDisplayNodeAssertMainThread();
+
+  [self layout];
+  
   for (ASDisplayNode *node in self.subnodes) {
     [node display];
   }
 
   CALayer *layer = [self isLayerBacked] ? self.layer : self.view.layer;
+
+  if (layer.contents) {
+    return;
+  }
+
   [layer setNeedsDisplay];
   [layer displayIfNeeded];
 }

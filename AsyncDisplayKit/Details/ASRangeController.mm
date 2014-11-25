@@ -209,7 +209,6 @@ static BOOL ASRangeIsValid(NSRange range)
 
   // if node is in the working range it should not actively be in view
   [node.view removeFromSuperview];
-  [node display];
 
   [_workingIndexPaths addObject:node.asyncdisplaykit_indexPath];
 }
@@ -559,6 +558,8 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
       for (NSIndexPath *indexPath in indexPaths) {
         ASCellNode *node = _nodes[indexPath];
         _nodeSizes[[self indexForIndexPath:indexPath]] = [NSValue valueWithCGSize:node.calculatedSize];
+
+        [node display];
       }
       ASDisplayNodeAssert(_nodeSizes.count == _sizedNodeCount, @"logic error");
 
