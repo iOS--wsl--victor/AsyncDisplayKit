@@ -96,22 +96,6 @@ typedef NS_ENUM(NSInteger, ASScrollDirection) {
   return sizingQueue;
 }
 
-+ (UIView *)workingView
-{
-  // we add nodes' views to this invisible window to start async rendering
-  static UIWindow *workingWindow = nil;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    workingWindow = [[UIWindow alloc] initWithFrame:CGRectZero];
-    workingWindow.windowLevel = UIWindowLevelNormal - 1000;
-    workingWindow.userInteractionEnabled = NO;
-    workingWindow.clipsToBounds = YES;
-    workingWindow.hidden = YES;
-  });
-
-  return workingWindow;
-}
-
 
 #pragma mark -
 #pragma mark Helpers.
@@ -196,14 +180,14 @@ static BOOL ASRangeIsValid(NSRange range)
   NSInteger index = [self indexForIndexPath:node.asyncdisplaykit_indexPath];
   if (NSLocationInRange(index, _workingRange)) {
     // move the node's view to the working range area, so its rendering persists
-    [self moveNodeToWorkingView:node];
+    [self moveNodeToWorkingRange:node];
   } else {
     // this node isn't in the working range, remove it from the view hierarchy
-    [self removeNodeFromWorkingView:node];
+    [self removeNodeFromWorkingRange:node];
   }
 }
 
-- (void)removeNodeFromWorkingView:(ASCellNode *)node
+- (void)removeNodeFromWorkingRange:(ASCellNode *)node
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node, @"invalid argument");
@@ -218,25 +202,28 @@ static BOOL ASRangeIsValid(NSRange range)
   [_workingIndexPaths removeObject:node.asyncdisplaykit_indexPath];
 }
 
-- (void)moveNodeToWorkingView:(ASCellNode *)node
+- (void)moveNodeToWorkingRange:(ASCellNode *)node
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node, @"invalid argument");
 
-  [self moveNode:node toView:[ASRangeController workingView]];
+  // if node is in the working range it should not actively be in view
+  [node.view removeFromSuperview];
+  [node display];
+
   [_workingIndexPaths addObject:node.asyncdisplaykit_indexPath];
 }
 
 - (void)moveNode:(ASCellNode *)node toView:(UIView *)view
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(node && view, @"invalid argument, did you mean -removeNodeFromWorkingView:?");
+  ASDisplayNodeAssert(node && view, @"invalid argument, did you mean -removeNodeFromWorkingRange:?");
 
   // use an explicit transaction to force CoreAnimation to display nodes in the order they are added.
   [CATransaction begin];
 
   [view addSubview:node.view];
-  
+
   [CATransaction commit];
 }
 
@@ -499,7 +486,7 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
   for (NSIndexPath *indexPath in removedIndexPaths) {
     ASCellNode *node = [self sizedNodeForIndexPath:indexPath];
     ASDisplayNodeAssert(node, @"an unsized node should never have entered the working range");
-    [self removeNodeFromWorkingView:node];
+    [self removeNodeFromWorkingRange:node];
   }
 
   // add nodes that have entered the working range (i.e., those that are in the new working range but not the old one)
@@ -508,7 +495,7 @@ static NSRange ASCalculateWorkingRange(ASRangeTuningParameters params, ASScrollD
     // if a node in the working range is still sizing, the sizing logic will add it to the working range for us later
     ASCellNode *node = [self sizedNodeForIndexPath:indexPath];
     if (node) {
-      [self moveNodeToWorkingView:node];
+      [self moveNodeToWorkingRange:node];
     } else {
       ASDisplayNodeAssert(_sizedNodeCount != _totalNodeCount, @"logic error");
     }
