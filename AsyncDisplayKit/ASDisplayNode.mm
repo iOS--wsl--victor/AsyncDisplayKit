@@ -441,7 +441,9 @@ void ASDisplayNodePerformBlockOnMainThread(void (^block)())
 {
   ASDisplayNodeAssertMainThread();
 
+  ASDN::MutexLocker l(_propertyLock);
   [self layout];
+  [self layoutDidFinish];
   
   for (ASDisplayNode *node in self.subnodes) {
     [node display];
